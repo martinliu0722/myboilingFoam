@@ -511,35 +511,41 @@ void Foam::functionObjects::bubbleGenerator::writeState() const
 {
     if (Pstream::master())
     {
-        IOobject io
-        (
-            "nucleationState",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        );
-
-        IOdictionary stateDict(io);
-
-        forAll(mySites_, i)
+        if (mesh_.time().outputTime())
         {
-            const NucleationSite& site = mySites_[i];
-            
-            dictionary siteDict;
-            siteDict.add("isActive", site.isActive);
-            siteDict.add("lifeTimer", site.lifeTimer);
-            siteDict.add("lastNucleationTime", site.lastNucleationTime);
-            
-            // [修正]
-            // 1. 先拼接成 string，再显式构造成 word
-            // 2. 然后再传给 add 函数
-            word siteKey("site" + Foam::name(i));
-            
-            stateDict.add(siteKey, siteDict);
-        }
+            Info<< "BubbleGenerator: Saving nucleation state at time "
+                << mesh_.time().timeName() << " ..." << endl;
 
-        stateDict.regIOobject::write();
+            IOobject io
+            (
+                "nucleationState",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            );
+
+            IOdictionary stateDict(io);
+
+            forAll(mySites_, i)
+            {
+                const NucleationSite& site = mySites_[i];
+                
+                dictionary siteDict;
+                siteDict.add("isActive", site.isActive);
+                siteDict.add("lifeTimer", site.lifeTimer);
+                siteDict.add("lastNucleationTime", site.lastNucleationTime);
+                
+                // [修正]
+                // 1. 先拼接成 string，再显式构造成 word
+                // 2. 然后再传给 add 函数
+                word siteKey("site" + Foam::name(i));
+                
+                stateDict.add(siteKey, siteDict);
+            }
+
+            stateDict.regIOobject::write();
+        }
     }
 }
 
