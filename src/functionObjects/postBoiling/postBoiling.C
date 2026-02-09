@@ -184,8 +184,7 @@ bool Foam::functionObjects::postBoiling::execute()
     const volScalarField& T =
         mesh_.lookupObject<volScalarField>("T");
 
-
-    forAll(patches_,patchi)
+    forAll(patches_, patchi)
     {
         scalar Tave(0), Nuave(0), dry(0), qw(0), totS(SMALL);
         //- More for splitPatch
@@ -307,6 +306,68 @@ bool Foam::functionObjects::postBoiling::execute()
             }
         }
 
+    }
+
+
+    // 1. 定义变量存储结果
+    scalar totalMdot = 0.0;       // 全场总相变率
+    scalar microlayerMdot = 0.0;  // 仅 fluid_to_solid 边界附近的微层相变率
+
+    // 2. 计算 Total Mass Source (totMdot)
+    // 逻辑：全场积分 mDot * V
+    if (mesh_.foundObject<volScalarField>("mDot"))
+    {
+        const volScalarField& mDot = mesh_.lookupObject<volScalarField>("mDot");
+
+        forAll(mDot, cellI)
+        {
+            totalMdot += mDot[cellI] * mesh_.V()[cellI];
+        }
+    }
+    else
+    {
+        Info << "Warning: 'mDot' field not found in registry." << endl;
+    }
+
+    // 3. 计算 Microlayer Mass Source (fluid_to_solid 边界求和)
+    // 逻辑：找到 fluid_to_solid 边界 -> 找到相邻网格 -> 求和 mDot0 * V
+    if (mesh_.foundObject<volScalarField>("mDot0"))
+    {
+        const volScalarField& mDot0 = mesh_.lookupObject<volScalarField>("mDot0");
+
+        // 查找边界 ID
+        label patchID = mesh_.boundaryMesh().findPatchID("fluid_to_solid");
+
+        if (patchID != -1)
+        {
+            const fvPatch& patch = mesh_.boundary()[patchID];
+            const labelList& faceCells = patch.faceCells();
+
+            // 遍历该边界上所有的面，找到对应的内部网格
+            forAll(faceCells, faceI)
+            {
+                label cellI = faceCells[faceI];
+                // 累加微层质量源项 (kg/s)
+                microlayerMdot += mDot0[cellI] * mesh_.V()[cellI];
+            }
+        }
+        else
+        {
+            // 如果找不到 fluid_to_solid，尝试找 wall 或者不报错（视你的网格命名而定）
+            if (Pstream::master()) 
+                Info << "Warning: patch 'fluid_to_solid' not found." << endl;
+        }
+    }
+
+    // 4. 并行计算归约 (MPI Reduce)
+    // 这一步必不可少，否则你只能得到主核的数据
+    reduce(totalMdot, sumOp<scalar>());
+    reduce(microlayerMdot, sumOp<scalar>());
+
+    if (Pstream::master())
+    {
+        file<< ", " << totalMdot
+            << ", " << microlayerMdot;
     }
 
     //- New line and close file
