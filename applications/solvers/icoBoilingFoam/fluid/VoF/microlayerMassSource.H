@@ -53,8 +53,8 @@ if(mixture.found("microlayerModel"))
         {
             label cellI = fCells[facei];
 
-            LatTSource[cellI] = 0;
-            mDot0[cellI] = 0;
+            // LatTSource[cellI] = 0;
+            // mDot0[cellI] = 0;
 
             //- Select interface cells only
             if(aBf[facei] < 1e-3 || aBf[facei] > 0.999)
@@ -102,20 +102,20 @@ if(mixture.found("microlayerModel"))
 
             scalar deltaTmp(TBf[facei] - Tsat.value());
 
-            //- Re-compute mDot0 at the interface
+            // - Re-compute mDot0 at the interface
             mDot0[cellI] +=
             (
                 lcValue/(hf.value()*mesh.V()[cellI])
                 *
                 (
-                //     (coeffs[0])
-                //   + (coeffs[1] * pow(deltaTmp, 1))
-                //   + (coeffs[2] * pow(deltaTmp, 2))
+            //     //     (coeffs[0])
+            //     //   + (coeffs[1] * pow(deltaTmp, 1))
+            //     //   + (coeffs[2] * pow(deltaTmp, 2))
                     
-                //     (coeffs[0] * deltaTmp)
-                //   + (coeffs[1] * pow(deltaTmp, 2))
-                //   + (coeffs[2] * pow(deltaTmp, 3))
-                //   + (coeffs[3] * pow(deltaTmp, 4))
+            //     //     (coeffs[0] * deltaTmp)
+            //     //   + (coeffs[1] * pow(deltaTmp, 2))
+            //     //   + (coeffs[2] * pow(deltaTmp, 3))
+            //     //   + (coeffs[3] * pow(deltaTmp, 4))
                     
                        coeffs[0]
                     + (coeffs[1] * std::pow(deltaTmp, 1.0))
@@ -125,14 +125,14 @@ if(mixture.found("microlayerModel"))
                     + (coeffs[5] * std::pow(deltaTmp, 5.0))
                     + (coeffs[6] * std::pow(deltaTmp, 6.0))
 
-                    // (coeffs[0] * deltaTmp)
-                    // + (coeffs[1] * std::pow(deltaTmp, 1.0 / 2.0))
-                    // + (coeffs[2] * std::pow(deltaTmp, 1.0 / 3.0))
-                    // + (coeffs[3] * std::pow(deltaTmp, 1.0 / 4.0))
-                    // + (coeffs[4] * std::pow(deltaTmp, 1.0 / 5.0))
-                    // + (coeffs[5] * std::pow(deltaTmp, 1.0 / 6.0))
-                    // + (coeffs[6] * std::pow(deltaTmp, 1.0 / 7.0))
-                    // + (coeffs[7] * std::pow(deltaTmp, 1.0 / 8.0))
+            //         // (coeffs[0] * deltaTmp)
+            //         // + (coeffs[1] * std::pow(deltaTmp, 1.0 / 2.0))
+            //         // + (coeffs[2] * std::pow(deltaTmp, 1.0 / 3.0))
+            //         // + (coeffs[3] * std::pow(deltaTmp, 1.0 / 4.0))
+            //         // + (coeffs[4] * std::pow(deltaTmp, 1.0 / 5.0))
+            //         // + (coeffs[5] * std::pow(deltaTmp, 1.0 / 6.0))
+            //         // + (coeffs[6] * std::pow(deltaTmp, 1.0 / 7.0))
+            //         // + (coeffs[7] * std::pow(deltaTmp, 1.0 / 8.0))
                 )
             );
 
