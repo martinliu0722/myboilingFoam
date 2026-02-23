@@ -7,7 +7,7 @@ const volScalarField& rho = trho();
 tmp<volScalarField> tcp = thermo.Cp();
 const volScalarField &cp = tcp();
 
-// volScalarField &solidMicrolayerSource = MicrolayerSourceSolid[i];
+volScalarField &solidMicrolayerSource = MicrolayerSourceSolid[i];
 
 tmp<volSymmTensorField> taniAlpha;
 if (!thermo.isotropic())
