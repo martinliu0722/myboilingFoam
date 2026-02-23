@@ -102,21 +102,12 @@ if(mixture.found("microlayerModel"))
 
             scalar deltaTmp(TBf[facei] - Tsat.value());
 
-            // - Re-compute mDot0 at the interface
+            //- Re-compute mDot0 at the interface
             mDot0[cellI] +=
             (
                 lcValue/(hf.value()*mesh.V()[cellI])
                 *
                 (
-            //     //     (coeffs[0])
-            //     //   + (coeffs[1] * pow(deltaTmp, 1))
-            //     //   + (coeffs[2] * pow(deltaTmp, 2))
-                    
-            //     //     (coeffs[0] * deltaTmp)
-            //     //   + (coeffs[1] * pow(deltaTmp, 2))
-            //     //   + (coeffs[2] * pow(deltaTmp, 3))
-            //     //   + (coeffs[3] * pow(deltaTmp, 4))
-                    
                        coeffs[0]
                     + (coeffs[1] * std::pow(deltaTmp, 1.0))
                     + (coeffs[2] * std::pow(deltaTmp, 2.0))
@@ -125,14 +116,14 @@ if(mixture.found("microlayerModel"))
                     + (coeffs[5] * std::pow(deltaTmp, 5.0))
                     + (coeffs[6] * std::pow(deltaTmp, 6.0))
 
-            //         // (coeffs[0] * deltaTmp)
-            //         // + (coeffs[1] * std::pow(deltaTmp, 1.0 / 2.0))
-            //         // + (coeffs[2] * std::pow(deltaTmp, 1.0 / 3.0))
-            //         // + (coeffs[3] * std::pow(deltaTmp, 1.0 / 4.0))
-            //         // + (coeffs[4] * std::pow(deltaTmp, 1.0 / 5.0))
-            //         // + (coeffs[5] * std::pow(deltaTmp, 1.0 / 6.0))
-            //         // + (coeffs[6] * std::pow(deltaTmp, 1.0 / 7.0))
-            //         // + (coeffs[7] * std::pow(deltaTmp, 1.0 / 8.0))
+                    // (coeffs[0] * deltaTmp)
+                    // + (coeffs[1] * std::pow(deltaTmp, 1.0 / 2.0))
+                    // + (coeffs[2] * std::pow(deltaTmp, 1.0 / 3.0))
+                    // + (coeffs[3] * std::pow(deltaTmp, 1.0 / 4.0))
+                    // + (coeffs[4] * std::pow(deltaTmp, 1.0 / 5.0))
+                    // + (coeffs[5] * std::pow(deltaTmp, 1.0 / 6.0))
+                    // + (coeffs[6] * std::pow(deltaTmp, 1.0 / 7.0))
+                    // + (coeffs[7] * std::pow(deltaTmp, 1.0 / 8.0))
                 )
             );
 
@@ -190,8 +181,8 @@ if(mixture.found("microlayerModel"))
         // ========================================================================
         // 将microlayer的 LatTSource 映射到固体区域
         // ========================================================================
-/*
-                    const polyPatch &pp = mesh.boundaryMesh()[patchID];
+
+        const polyPatch &pp = mesh.boundaryMesh()[patchID];
 
         // 依然需要检查这是否是一个映射边界，否则无法传数据
         if (isA<mappedPatchBase>(pp))
@@ -213,11 +204,6 @@ if(mixture.found("microlayerModel"))
                 solidMesh.lookupObject<volScalarField>("solidMicrolayerSource")
             );
 
-            volScalarField &solidRefineField = const_cast<volScalarField &>
-            (
-                solidMesh.lookupObject<volScalarField>("solidrefine")
-                );
-
             const fvPatchScalarField &alpha1Bf = alpha1.boundaryField()[patchID];
 
             scalarField alphaFluid = alpha1Bf; // 拷贝一份数据
@@ -238,17 +224,14 @@ if(mixture.found("microlayerModel"))
             // 4. 数据传输 (Fluid Patch -> Solid Patch)
             scalarField qOnSolidPatch = qFluid;
             mpp.reverseDistribute(qOnSolidPatch);
-
-            mpp.reverseDistribute(alphaFluid);
-
             
             // --- [DEBUG 代码开始] ---
-            gMin/gMax 支持并行，能看到所有处理器的极值
-            Info << "\n[DEBUG] qOnSolidPatch Stats:" << nl
-                << "    Size: " << qOnSolidPatch.size() << nl
-                << "    Min : " << gMin(qOnSolidPatch) << nl
-                << "    Max : " << gMax(qOnSolidPatch) << nl
-                << "    Avg : " << gAverage(qOnSolidPatch) << endl;
+            //gMin/gMax 支持并行，能看到所有处理器的极值
+            // Info << "\n[DEBUG] qOnSolidPatch Stats:" << nl
+            //     << "    Size: " << qOnSolidPatch.size() << nl
+            //     << "    Min : " << gMin(qOnSolidPatch) << nl
+            //     << "    Max : " << gMax(qOnSolidPatch) << nl
+            //     << "    Avg : " << gAverage(qOnSolidPatch) << endl;
             // --- [DEBUG 代码结束] ---
             
 
@@ -274,12 +257,10 @@ if(mixture.found("microlayerModel"))
                 // 如果这是唯一的源，用 =；如果是累加，用 +=
                 energySrcSolid[cellID] = flux * faceArea / cellVol;
 
-                solidRefineField[cellID] = max(solidRefineField[cellID], mappedAlpha);
             }
 
             // 6. 更新并行边界(可选,没有测试是否有用)
             energySrcSolid.correctBoundaryConditions();
-            solidRefineField.correctBoundaryConditions();
 
             // Debug 输出 (可选)
             // Info << "Mapped microlayer source from " << pp.name() 
@@ -287,6 +268,6 @@ if(mixture.found("microlayerModel"))
         
 
         }
-*/
+
     }
 }
