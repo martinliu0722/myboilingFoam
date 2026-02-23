@@ -5,8 +5,7 @@
     PtrList<fv::options> solidHeatSources(solidRegions.size());
     PtrList<volScalarField> betavSolid(solidRegions.size());
     PtrList<volSymmTensorField> aniAlphas(solidRegions.size());
-    // PtrList<volScalarField> MicrolayerSourceSolid(solidRegions.size());
-    // PtrList<volScalarField> solidRefineFields(solidRegions.size());
+    PtrList<volScalarField> MicrolayerSourceSolid(solidRegions.size());
 
     scalarField maxTSolid(solidRegions.size(),0.);
 
@@ -115,48 +114,29 @@
             );
         }
 
-        // Info<< "Adding field solidMicrolayerSource\n" << endl;
-        // MicrolayerSourceSolid.set
-        // (
-        //     i,
-        //     new volScalarField
-        //     (
-        //         IOobject
-        //         (
-        //             "solidMicrolayerSource",
-        //             runTime.timeName(),
-        //             solidRegions[i],
-        //             IOobject::NO_READ,
-        //             IOobject::AUTO_WRITE
-        //         ),
-        //         solidRegions[i],
-        //         dimensionedScalar
-        //         (
-        //             "solidMicrolayerSource",
-        //             dimensionSet(1,-1,-3,0,0,0,0),
-        //             0.0
-        //         )
-        //     )
-        // );
-
-        // Info<< "Adding field refine for mesh refinement\n" << endl;
-        // solidRefineFields.set
-        // (
-        //     i,
-        //     new volScalarField
-        //     (
-        //         IOobject
-        //         (
-        //             "solidrefine",
-        //             runTime.timeName(),
-        //             solidRegions[i],
-        //             IOobject::READ_IF_PRESENT, // 如果0文件夹里有就读，没有就新建
-        //             IOobject::AUTO_WRITE
-        //         ),
-        //         solidRegions[i],
-        //         dimensionedScalar("solidrefine", dimless, 0.0) // 默认值为0
-        //     )
-        // );
+         Info<< "Adding field solidMicrolayerSource\n" << endl;
+         MicrolayerSourceSolid.set
+         (
+             i,
+             new volScalarField
+             (
+                 IOobject
+                 (
+                     "solidMicrolayerSource",
+                     runTime.timeName(),
+                     solidRegions[i],
+                     IOobject::NO_READ,
+                     IOobject::AUTO_WRITE
+                 ),
+                 solidRegions[i],
+                 dimensionedScalar
+                 (
+                     "solidMicrolayerSource",
+                     dimensionSet(1,-1,-3,0,0,0,0),
+                     0.0
+                 )
+             )
+         );
     }
 
 
